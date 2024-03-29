@@ -1,12 +1,17 @@
 import React from "react";
+import { Routes, Route, HashRouter } from 'react-router-dom';
+import Home from "./views/home";
 
-function App() {
-  return (
-    <div>
-      <h1>💖 Hello World!</h1>
-      <p>Welcome to .</p>
-    </div>
-  );
+const App = () => {
+	return (
+		<div>
+			<HashRouter>
+				<Routes>
+					<Route path="/" exact  element={ <Home /> }  />
+				</Routes>
+			</HashRouter>
+		</div>
+	);
 }
 
 export default App;
