@@ -36,15 +36,16 @@ const FolderView = () => {
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                 <IconButton component={Link} to="/" style={{ marginRight: '10px' }}>
                     <ArrowBackIcon />
+                    <span style={{marginLeft: 20,marginBottom:8}}>{folderName}</span>
                 </IconButton>
             </div>
             <div>
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {files && files.map((file, index) => (
-                        // <Card key={index} style={{ width: '350px', margin: '10px' }}>
-                        //     <CardMedia component="img" image={file.path} alt={file.path} />
-                        // </Card>
-                        <img src={`http://localhost:3100/images/${folderName}/${file.name}`} width={'100px'} height={'100px'} ></img>
+                        <Card key={index} style={{ width: '100px', margin: '10px' }}>
+                            <CardMedia component="img" image={`http://localhost:3100/images/${folderName}/${file.name}`} alt={file.path} />
+                        </Card>
+                        // <img src={`http://localhost:3100/images/${folderName}/${file.name}`} width={'100px'} height={'100px'} ></img>
                     ))}
                 </div>
             </div>

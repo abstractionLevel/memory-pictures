@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 const { ipcRenderer } = window.require('electron');
 const fs = window.require('fs');
 const path = window.require('path');
+import Menu from '../components/menu';
+
 
 
 const Home = () => {
@@ -32,8 +34,10 @@ const Home = () => {
 
     return (
         <div >
-            <button onClick={onListen}>Connect</button>
-            <h2>Lista delle cartelle:</h2>
+            {/* <div style={{ borderTop: "1px solid black", marginTop: "10px", paddingTop: "10px" }}>
+                <Button onClick={onListen}>Connect</Button>
+            </div> */}
+            <Menu/>
             <div style={{ display: "flex" }}>
                 {folders.map(folderName => (
                     <div style={{ width: "100px", marginLeft: "10px" }}>
