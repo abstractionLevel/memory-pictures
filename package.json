@@ -37,6 +37,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@electron/remote": "^2.1.2",
     "@mui/icons-material": "^5.15.14",
     "bootstrap": "^5.3.3",
     "dgram": "^1.0.1",
@@ -44,9 +45,11 @@
     "electron-log": "^5.1.2",
     "electron-squirrel-startup": "^1.0.0",
     "express": "^4.19.2",
+    "ftp-srv": "^4.6.3",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.2",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3"
+    "react-router-dom": "^6.22.3",
+    "socket.io": "^4.7.5"
   }
 }

@@ -1,7 +1,5 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const dgram = require('dgram');
-const fs = require('fs');
 const { spawn } = require('child_process');
 
 
@@ -10,7 +8,6 @@ if (require('electron-squirrel-startup')) {
 	app.quit();
 }
 
-const server = dgram.createSocket('udp4');
 
 const createWindow = () => {
 	// Create the browser window.
@@ -37,6 +34,7 @@ const createWindow = () => {
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
+			enableRemoteModule: true
 		},
 	});
 
@@ -71,35 +69,8 @@ app.on('window-all-closed', () => {
 	}
 });
 
-ipcMain.on('receive-file', (event) => {
-	const server = dgram.createSocket('udp4');
-	const projectDir = process.cwd();
-	console.log('Directory corrente del progetto:', projectDir);
-	server.on('error', (err) => {
-		console.log(`Server error:\n${err.stack}`);
-		server.close();
+ipcMain.on('openPopup', () => {
+    dialog.showOpenDialog({
+		properties: ['openDirectory']
 	});
-
-	server.on('message', (file, rinfo) => {
-		/**
-		 * todo: dopo ricevuta la cartella devo aggiornare la view
-		 */
-		const projectDir = process.cwd();
-		const filePath = path.join(projectDir + "/src/folders", 'file_ricevuto');
-		fs.writeFile(filePath, file, (err) => {
-			if (err) {
-				console.error('Error saving file:', err);
-				return;
-			}
-			console.log('File saved successfully:', filePath);
-		});
-	});
-
-	server.on('listening', () => {
-		const address = server.address();
-		console.log(`Server listening ${address.address}:${address.port}`);
-	});
-
-	server.bind(8080);
-	console.log("connesione ", server)
 });

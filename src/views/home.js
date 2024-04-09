@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import FolderIcon from "@mui/icons-material/Folder";
 import { Link } from 'react-router-dom';
-const { ipcRenderer } = window.require('electron');
 const fs = window.require('fs');
 const path = window.require('path');
 import Menu from '../components/menu';
@@ -12,9 +11,6 @@ const Home = () => {
 
     const [folders, setFolders] = useState([]);
 
-    const onListen = () => {
-        ipcRenderer.send('receive-file');
-    };
 
     useEffect(() => {
         const loadFolders = async () => {
@@ -34,9 +30,6 @@ const Home = () => {
 
     return (
         <div >
-            {/* <div style={{ borderTop: "1px solid black", marginTop: "10px", paddingTop: "10px" }}>
-                <Button onClick={onListen}>Connect</Button>
-            </div> */}
             <Menu/>
             <div style={{ display: "flex" }}>
                 {folders.map(folderName => (
