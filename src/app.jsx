@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, HashRouter } from 'react-router-dom';
 import Home from "./views/home";
 import FolderView from "./views/folderView";
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
 	return (

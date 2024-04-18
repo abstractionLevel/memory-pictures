@@ -32,14 +32,22 @@ const getDirectoryTree = async (rootPath) => {
     return directories;
 }
 
-const writeFileAsync = async (filePath, data) => {
-    try {
-        await fs.writeFile(filePath, data, 'utf8');
-        io.emit('message', 'File salvato con successo:');
-    } catch (error) {
-        io.emit('message', 'Errore durante la scrittura del file:', error);
-    }
-}
+// const writeFileAsync = async (filePath, data,socket) => {
+//     try {
+//         await fs.writeFile(filePath, data, 'base64');
+//         console.log("spedisco il messagio a react native")
+//         socket.to("rect-native-12").emit('fileRecivied');
+//     } catch (error) {
+//         socket.to("rect-native-12").emit('error', 'Errore durante la scrittura del file:', error);
+//     }
+// }
+
+const writeFileAsync = (filePath, data) => {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(filePath, data, 'base64');
+        resolve();
+    });
+};
 
 app.use(express.static(path.join(__dirname, 'build')));
 
@@ -60,25 +68,26 @@ io.on('connection', async (socket) => {
 
     const directoryTree = await getDirectoryTree(path.join(__dirname, 'folders'));
 
-    socket.emit('directoryTree', directoryTree);
+    socket.on('getTirectoryTree', (msg) => {
+        socket.emit('directoryTree', directoryTree);
+    });
 
     socket.on('file', ({ filename, content, pathOfFile }) => {
         const filePath = path.join("src/folders/" + pathOfFile, filename);
-        const decodedContent = Buffer.from(content, 'base64');
-
-        writeFileAsync(filePath, decodedContent);
-
+        writeFileAsync(filePath, content,socket)
+            .then(()=>{
+                socket.emit('fileRecivied');
+            })
+            .catch(()=>{
+                socket.to("rect-native-12").emit('error', 'Errore durante la scrittura del file:', error);
+            })
     });
 
-    socket.on('messageFromClientElectron', (msg) => {
-        const data = msg.content
-        const base64Data = data.toString('base64'); // Converti il buffer in una stringa Base64
-
-        console.log("messaggio ricevuto da electron " , base64Data)
-        socket.to("rect-native-12").emit("messagToNative", {
-            content:base64Data,
+    socket.on('sendFileToDesk', (msg) => {
+        socket.to("rect-native-12").emit("reciveFile", {
+            content:msg.content,
             name:msg.filename,
-            pathOfFile:msg.pathOfFile
+            path:msg.path
         });
     });
 
@@ -87,8 +96,12 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('sendDirectoriesToDesk', (msg) => {
-        // console.log("spedisco le directori al componente  ", msg)
         socket.to("react-electron-12").emit("getDirectories",msg);
+    });
+
+    socket.on('fileReciviedFromMobile', () => {
+        console.log("spedisco il file")
+        socket.to("react-electron-12").emit("fileRicevied");
     });
 
 

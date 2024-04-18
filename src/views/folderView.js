@@ -4,10 +4,11 @@ import { IconButton, Card, CardMedia } from '@mui/material';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Modal } from 'react-bootstrap';
 import { connectToApp } from "../services/file.service";
+import { ToastContainer, toast } from 'react-toastify';
 const fs = window.require('fs');
 const path = window.require('path');
 import io from 'socket.io-client';
-import './folderView.css'; // Importa il file CSS
+import './folderView.css';
 
 
 
@@ -17,19 +18,20 @@ const socket = io('http://192.168.1.7:3100', {
 
 const FolderView = () => {
 
-
-
     const { folderName } = useParams();
     const [files, setFiles] = useState([]);
     const [isModalDirectories, setIsModalDirectories] = useState(false);
     const [directories, setDirectories] = useState(null);
+    const [isNotify, setIsNotify] = useState(false);
 
 
     socket.on('getDirectories', (data) => {
-        console.log("ecco le directories ", data)//capire il response
         setDirectories(data)
     });
 
+    socket.on('fileRicevied', () => {
+        setIsNotify(true)
+    });
 
     const handleDirectoryModal = () => {
         setIsModalDirectories(!isModalDirectories);
@@ -45,24 +47,42 @@ const FolderView = () => {
         }
     };
 
-    const provaMess = async () => {
-        // const filePath = 'C:/projects/memory-pictures/src/folders/documenti/televisione1.jpg';
-        // fs.readFile(filePath, (err, data) => {
-        //     if (err) {
-        //       console.error('Si è verificato un errore durante la lettura del file:', err);
-        //       return;
-        //     }
-        //     socket.emit('messageFromClientElectron', {
-        //         filename: 'televisione1.jpg',
-        //         content: data,
-        //         pathOfFile: "priva"
-        //     });
-        //   });
+    const getDirectoriesPathFromMobile = async () => {
         socket.emit('getDirectoriesPathFromMobile', "");
+    }
 
+    const sendFile = (path) => {
+        const filePath = 'C:/projects/memory-pictures/src/folders/documenti/televisione1.jpg';
+        fs.readFile(filePath,'base64', (err, data) => {
+            if (err) {
+                console.error('Si è verificato un errore durante la lettura del file:', err);
+                return;
+            }
+            socket.emit('sendFileToDesk', {
+                filename: 'televisione1.jpg',
+                content: data,
+                path: path
+            });
+            setIsModalDirectories(false);
+
+        });
 
     }
 
+    const renderInnerDirectories = (tree, spc, path) => {
+
+        return tree.map((item, index) => {
+            const newSpc = spc + 3;
+            const pathTree = path + '/' + item.name;
+            return (
+                <div style={{ marginLeft: newSpc }}  >
+                    <p className="direcotryLabel">|</p>
+                    <p className="direcotryLabel" style={{ cursor: "pointer" }} onClick={() => sendFile(pathTree)} >{item.name}</p>
+                    {item.directories.length > 0 && renderInnerDirectories(item.directories, newSpc, pathTree)}
+                </div>
+            )
+        })
+    }
 
     useEffect(() => {
         const fetchFolders = async () => {
@@ -84,25 +104,28 @@ const FolderView = () => {
         fetchFolders();
     }, []);
 
-
-    const renderInnerDirectories = (tree,spc) => {
-        return tree.map((item,index)=>{
-            const newSpc = spc + 3;
-            return (
-                <div style={{marginLeft:newSpc}}>
-                    <p className="direcotryLabel">|</p>
-                    <p className="direcotryLabel">{item.name}</p>
-                    {item.directories.length > 0 && renderInnerDirectories(item.directories, newSpc)}
-                </div>
-            )
-        })
-    }
-
     useEffect(() => {
         if (directories) {
             setIsModalDirectories(true);
         }
     }, [directories]);
+
+    useEffect(() => {
+        if (isNotify) {
+            setIsNotify(false);
+            toast.success('🦄 file sent', {
+                position: "top-right",
+                autoClose: 1000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            console.log("ciao")
+        }
+    }, [isNotify])
 
     return (
         <div>
@@ -122,18 +145,18 @@ const FolderView = () => {
                     ))}
                 </div>
             </div>
-            <button onClick={provaMess}>send file</button>
+            <button onClick={getDirectoriesPathFromMobile}>send file</button>
             <Modal show={isModalDirectories} onHide={handleDirectoryModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Titolo del Modal</Modal.Title>
+                    <Modal.Title>Chose Directory</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {directories && directories.map(el => (
                         <div>
-                            <p className="direcotryLabel">{el.name}</p>
+                            <p onClick={sendFile} style={{ cursor: "pointer" }} className="direcotryLabel">{el.name}</p>
                             {el.directories.length > 0 && (
-                                renderInnerDirectories(el.directories, 20)
-                        )}
+                                renderInnerDirectories(el.directories, 20, el.name)
+                            )}
                         </div>
 
                     ))}
@@ -142,9 +165,9 @@ const FolderView = () => {
                     <Button variant="secondary" onClick={handleDirectoryModal}>
                         Chiudi
                     </Button>
-                    {/* Puoi aggiungere altri bottoni qui se necessario */}
                 </Modal.Footer>
             </Modal>
+            <ToastContainer />
         </div>
     )
 
