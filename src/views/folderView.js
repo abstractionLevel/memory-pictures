@@ -122,9 +122,7 @@ const FolderView = () => {
                 draggable: true,
                 progress: undefined,
                 theme: "light",
-            });
-            console.log("ciao")
-        }
+            });        }
     }, [isNotify])
 
     return (
