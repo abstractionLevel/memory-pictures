@@ -1,9 +1,22 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const path = require('path');
+const fs = require('fs');
+
+const serverFilePath = path.join(__dirname, 'server.js');
+if (!fs.existsSync(serverFilePath)) {
+  throw new Error('Il file server.js non esiste nella directory corrente.');
+}
 
 module.exports = {
   packagerConfig: {
     asar: true,
+    extraResources: [
+      {
+        from: path.join(__dirname, 'server111111.js'), // Percorso completo del file server.js
+        to: 'extraResources', // Cartella di destinazione nel pacchetto (la stessa della radice)
+      },
+    ],
   },
   rebuildConfig: {},
   makers: [

@@ -1,0 +1,11 @@
+{
+    "appId": "com.ug.memory_pictures",
+    "productName": "MemoryPictures",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+  

@@ -7,6 +7,8 @@ const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: '*' } });
 const fs = require('fs').promises; // Per gestire le operazioni sul filesystem in modo asincrono
 
+app.use(express.static(path.join(__dirname, 'doc')));
+
 
 const getDirectoryTree = async (rootPath) => {
     const stats = await fs.stat(rootPath);
@@ -49,18 +51,24 @@ const writeFileAsync = (filePath, data) => {
     });
 };
 
-app.use(express.static(path.join(__dirname, 'build')));
 
 
-app.get('/images/:folderName/:fileName', (req, res) => {
-    const folderName = req.params.folderName;
-    const fileName = req.params.fileName;
-    const imagePath = path.join(__dirname, 'folders', folderName, fileName);
-    res.sendFile(imagePath);
+app.get('/images/:folderName/*', (req, res) => {
+    const parametro = req.query.parametro;
+    if(parametro) {
+        const projectDir = process.cwd();
+        const folderPath = path.join(projectDir, 'media',parametro);
+        res.sendFile(folderPath);
+    }
+
 });
 
-io.on('connection', async (socket) => {
+app.get('/hello', (req, res) => {
+    // Invia il messaggio "Hello, world!" come risposta
+    res.send('Hello, world!');
+  });
 
+io.on('connection', async (socket) => {
     const clientId = socket.handshake.query.clientId;
     socket.join(clientId);
 
@@ -72,8 +80,9 @@ io.on('connection', async (socket) => {
         socket.emit('directoryTree', directoryTree);
     });
 
+   
     socket.on('file', ({ filename, content, pathOfFile }) => {
-        const filePath = path.join("src/folders/" + pathOfFile, filename);
+        const filePath = path.join("media" + pathOfFile, filename);
         writeFileAsync(filePath, content,socket)
             .then(()=>{
                 socket.emit('fileRecivied');
@@ -109,7 +118,7 @@ io.on('connection', async (socket) => {
 
  
 const port = 3100;
-server.listen(port, () => {
+server.listen(port, async () => {
     console.log(`Server Express in esecuzione sulla porta ${port}`);
 });
 

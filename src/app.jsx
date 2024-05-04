@@ -10,7 +10,7 @@ const App = () => {
 			<HashRouter>
 				<Routes>
 					<Route path="/" exact  element={ <Home /> }  />
-					<Route path="/folder/:folderName"   element={ <FolderView /> }  />
+					<Route path="/folder/:folderName/*"  element={ <FolderView /> }  />
 				</Routes>
 			</HashRouter>
 		</div>

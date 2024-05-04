@@ -1,23 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import FolderIcon from "@mui/icons-material/Folder";
 import { Link } from 'react-router-dom';
-const fs = window.require('fs');
+const fs = window.require('fs').promises;
 const path = window.require('path');
-import Menu from '../components/menu';
-
-
 
 const Home = () => {
 
     const [folders, setFolders] = useState([]);
 
+    const createMediaFolder = async () => {
+        try {
+            await fs.stat("media");
+        } catch (error) {
+            await fs.mkdir("media", { recursive: true });
+        }
+    }
 
     useEffect(() => {
+
         const loadFolders = async () => {
             try {
                 const projectDir = process.cwd();
-                const folderPath = path.join(projectDir, 'src', 'folders');
-                const folderNames = await fs.promises.readdir(folderPath);
+                const folderPath = path.join(projectDir, 'media');
+                const folderNames = await fs.readdir(folderPath);
                 setFolders(folderNames);
             } catch (error) {
                 console.error('Error loading folders:', error);
@@ -25,17 +30,23 @@ const Home = () => {
         };
 
         loadFolders();
+        createMediaFolder();
 
     }, []);
 
     return (
         <div >
-            <Menu/>
-            <div style={{ display: "flex" }}>
+            {/* <Menu/> */}
+            <div style={{ display: "flex", marginTop: 30 }}>
                 {folders.map(folderName => (
                     <div style={{ width: "100px", marginLeft: "10px" }}>
                         <div style={{ display: "flex", alignItems: 'center', justifyContent: 'center' }}>
-                            <Link to={`/folder/${folderName}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <Link to={{
+                                pathname: `/folder/${folderName}`,
+                                search: '?parametro=' + folderName
+                            }}
+                                style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
                                 <FolderIcon />
                             </Link>
                         </div>
